@@ -1,19 +1,22 @@
 """
 HTML Feature Extraction Script
 
-This script extracts various features from an HTML file using BeautifulSoup.
+This script extracts various features from HTML files using BeautifulSoup and
+formats the results into a pandas dataframe.
 
 Script Flow:
-1. Instantiates the HTMLFeatureExtractor class with the HTML content.
-2. Extracts binary features such as the presence of tags (title, form, input, etc.).
-3. Extracts quantitative features like the number of tags (input, button, img, etc.).
-4. Extracts heuristic features to aid in phishing detection.
-5. Prints the extracted features.
+1. Reads HTML files from the 'html_dataset' folder.
+2. For each HTML file, instantiates the HTMLFeatureExtractor class with the HTML content.
+3. Extracts binary features such as the presence of tags (title, form, input, etc.).
+4. Extracts quantitative features like the number of tags (input, button, img, etc.).
+5. Extracts heuristic features to aid in phishing detection.
+6. Appends the extracted features to a pandas dataframe.
+7. Prints the dataframe.
 
 Usage:
-- Ensure 'requests' and 'beautifulsoup4' are installed.
+- Ensure 'requests', 'beautifulsoup4', 'bs4', and 'pandas' are installed.
 - Create a virtual environment and install dependencies using 'pip install -r requirements.txt'.
-- Specify the path to the HTML file in 'html_file_path'.
+- Ensure the 'html_dataset' folder contains HTML files.
 - Run the script using 'python script_name.py'.
 
 Author: Ahmaad Ansari
@@ -21,7 +24,7 @@ Date: March 5, 2024
 """
 
 import os
-import requests
+import pandas as pd
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 
@@ -207,29 +210,42 @@ class HTMLFeatureExtractor:
             print(f"{feature}: {value}")
 
 def main():
-    # Example usage
-    html_file_path = 'html_dataset/www.example.com.html'
+    # Specify the directory containing HTML files
+    html_files_directory = 'html_dataset'
 
-    try:
-        with open(html_file_path, 'r', encoding='utf-8') as file:
-            html_content = file.read()
+    # Create an empty dataframe to store the features
+    feature_df = pd.DataFrame()
 
-        # Instantiate the HTMLFeatureExtractor class
-        html_feature_extractor = HTMLFeatureExtractor(html_content)
+    # Process each HTML file in the directory
+    for html_file_name in os.listdir(html_files_directory):
+        if html_file_name.endswith('.html'):
+            try:
+                html_file_path = os.path.join(html_files_directory, html_file_name)
 
-        # Extract binary features
-        html_feature_extractor.extract_binary_features()
+                with open(html_file_path, 'r', encoding='utf-8') as file:
+                    html_content = file.read()
 
-        # Extract quantitative features
-        html_feature_extractor.extract_quantitative_features()
+                # Instantiate the HTMLFeatureExtractor class
+                html_feature_extractor = HTMLFeatureExtractor(html_content)
 
-        # Extract heuristic features
-        html_feature_extractor.extract_heuristic_features()
+                # Extract binary features
+                html_feature_extractor.extract_binary_features()
 
-        # Print all features
-        html_feature_extractor.print_features()
-    except Exception as e:
-        print(f"Error processing HTML file: {e}")
+                # Extract quantitative features
+                html_feature_extractor.extract_quantitative_features()
+
+                # Extract heuristic features
+                html_feature_extractor.extract_heuristic_features()
+
+                # Append features to the dataframe
+                features = html_feature_extractor.features.copy()
+                features['html_file'] = html_file_name
+                feature_df = feature_df.append(features, ignore_index=True)
+            except Exception as e:
+                print(f"Error processing HTML file {html_file_name}: {e}")
+
+    # Print the dataframe
+    print(feature_df)
 
 if __name__ == "__main__":
     main()
