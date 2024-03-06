@@ -213,8 +213,8 @@ def main():
     # Specify the directory containing HTML files
     html_files_directory = 'html_dataset'
 
-    # Create an empty dataframe to store the features
-    feature_df = pd.DataFrame()
+    # Create an empty list to store the features
+    features_list = []
 
     # Process each HTML file in the directory
     for html_file_name in os.listdir(html_files_directory):
@@ -237,15 +237,19 @@ def main():
                 # Extract heuristic features
                 html_feature_extractor.extract_heuristic_features()
 
-                # Append features to the dataframe
+                # Append features to the list
                 features = html_feature_extractor.features.copy()
                 features['html_file'] = html_file_name
-                feature_df = feature_df.append(features, ignore_index=True)
+                features_list.append(features)
             except Exception as e:
                 print(f"Error processing HTML file {html_file_name}: {e}")
 
+    # Create a dataframe from the list of features
+    feature_df = pd.DataFrame(features_list)
+
     # Print the dataframe
     print(feature_df)
+
 
 if __name__ == "__main__":
     main()
