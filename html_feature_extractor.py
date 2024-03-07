@@ -1,21 +1,38 @@
+"""
+HTMLFeatureExtractor Script
+
+This script defines the HTMLFeatureExtractor class, which is responsible for extracting various features from HTML content.
+
+The script includes methods to extract binary features, quantitative features, and heuristic features. It also provides
+methods to calculate percentages, detect redirects, and calculate domain name similarity. Additionally, the script
+contains a sample usage example at the end.
+
+Author: Ahmaad Ansari
+"""
+
+
 import os
 import pandas as pd
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 
+# HTMLFeatureExtractor class for extracting features from HTML content
 class HTMLFeatureExtractor:
     def __init__(self, html_content):
         try:
+            # Initialize BeautifulSoup object for parsing HTML
             self.soup = BeautifulSoup(html_content, 'html.parser')
         except Exception as e:
             print(f"Error creating BeautifulSoup object: {e}")
             raise
 
+        # Dictionary to store extracted features
         self.features = {}
 
     def extract_binary_features(self):
-        # Binary features
+        # Binary features extraction
         try:
+            # Check for the presence of various HTML elements
             self.features['has_title'] = bool(self.soup.title)
             self.features['has_meta_description'] = bool(self.soup.find('meta', {'name': 'description'}))
             self.features['has_form'] = bool(self.soup.form)
@@ -43,8 +60,9 @@ class HTMLFeatureExtractor:
             print(f"Error extracting binary features: {e}")
 
     def extract_quantitative_features(self):
-        # Quantitative features
+        # Quantitative features extraction
         try:
+            # Count the occurrences of various HTML elements
             self.features['num_input_tags'] = len(self.soup.find_all('input'))
             self.features['num_button_tags'] = len(self.soup.find_all('button'))
             self.features['num_img_tags'] = len(self.soup.find_all('img'))
@@ -64,8 +82,9 @@ class HTMLFeatureExtractor:
             print(f"Error extracting quantitative features: {e}")
 
     def extract_heuristic_features(self):
-        # Heuristic features
+        # Heuristic features extraction
         try:
+            # Calculate various heuristic features
             self.features['url_length'] = len(self.soup.prettify())  # Replace with an appropriate length metric
             self.features['has_ip_in_url'] = None
             self.features['uses_url_shortener'] = None
@@ -83,6 +102,7 @@ class HTMLFeatureExtractor:
 
     def extract_external_domains(self):
         try:
+            # Extract external domains from various HTML tags
             return [urlparse(tag['src']).netloc for tag in self.soup.find_all(['script', 'link', 'img', 'a'], src=True, href=True)]
         except Exception as e:
             print(f"Error extracting external domains: {e}")
@@ -90,6 +110,7 @@ class HTMLFeatureExtractor:
 
     def extract_external_resources(self):
         try:
+            # Extract external resources from various HTML tags
             return [tag['src'] for tag in self.soup.find_all(['script', 'link', 'img'], src=True, href=True)]
         except Exception as e:
             print(f"Error extracting external resources: {e}")
@@ -97,6 +118,7 @@ class HTMLFeatureExtractor:
 
     def extract_external_forms(self):
         try:
+            # Extract external forms from form tags with valid action URLs
             return [form['action'] for form in self.soup.find_all('form', action=True) if urlparse(form['action']).netloc]
         except Exception as e:
             print(f"Error extracting external forms: {e}")
@@ -104,6 +126,7 @@ class HTMLFeatureExtractor:
 
     def extract_external_links(self):
         try:
+            # Extract external links from anchor tags with valid href URLs
             return [link['href'] for link in self.soup.find_all('a', href=True) if urlparse(link['href']).netloc]
         except Exception as e:
             print(f"Error extracting external links: {e}")
@@ -111,6 +134,7 @@ class HTMLFeatureExtractor:
 
     def extract_external_images(self):
         try:
+            # Extract external images from img tags with valid src URLs
             return [img['src'] for img in self.soup.find_all('img', src=True) if urlparse(img['src']).netloc]
         except Exception as e:
             print(f"Error extracting external images: {e}")
@@ -118,6 +142,7 @@ class HTMLFeatureExtractor:
 
     def calculate_percentage_external_resources(self):
         try:
+            # Calculate the percentage of external resources compared to total resources
             total_resources = len(self.soup.find_all(['script', 'link', 'img'], src=True, href=True))
             external_resources = len(self.extract_external_resources())
             return (external_resources / total_resources) * 100 if total_resources > 0 else 0
@@ -127,6 +152,7 @@ class HTMLFeatureExtractor:
 
     def calculate_percentage_external_forms(self):
         try:
+            # Calculate the percentage of external forms compared to total forms
             total_forms = len(self.soup.find_all('form', action=True))
             external_forms = len(self.extract_external_forms())
             return (external_forms / total_forms) * 100 if total_forms > 0 else 0
@@ -136,6 +162,7 @@ class HTMLFeatureExtractor:
 
     def calculate_percentage_external_links(self):
         try:
+            # Calculate the percentage of external links compared to total links
             total_links = len(self.soup.find_all('a', href=True))
             external_links = len(self.extract_external_links())
             return (external_links / total_links) * 100 if total_links > 0 else 0
@@ -145,6 +172,7 @@ class HTMLFeatureExtractor:
 
     def calculate_percentage_js_content(self):
         try:
+            # Calculate the percentage of JS content compared to total content
             total_content = len(''.join([str(tag) for tag in self.soup.find_all()]))
             js_content = len(''.join([str(tag) for tag in self.soup.find_all('script')]))
             return (js_content / total_content) * 100 if total_content > 0 else 0
@@ -154,6 +182,7 @@ class HTMLFeatureExtractor:
 
     def detect_multiple_domain_redirects(self, url):
         try:
+            # Method to detect multiple domain redirects
             redirect_urls = set()
             current_url = url
             for tag in self.soup.find_all(['meta', 'script'], {'http-equiv': 'refresh'}):
@@ -171,6 +200,7 @@ class HTMLFeatureExtractor:
 
     def calculate_domain_name_similarity(self, url):
         try:
+            # Method to calculate domain name similarity
             if url:
                 original_domain = urlparse(url).netloc.replace('www.', '')
                 phishing_domain = urlparse(self.soup.head.find('meta', {'name': 'author'}).get('content', '')).netloc.replace('www.', '')
@@ -181,6 +211,7 @@ class HTMLFeatureExtractor:
             return None
 
     def print_features(self):
+        # Method to print extracted features
         for feature, value in self.features.items():
             print(f"{feature}: {value}")
 
