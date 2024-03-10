@@ -22,6 +22,7 @@ Author: Ahmaad Ansari
 Date: March 10, 2024
 """
 
+import os
 import logging
 import requests
 import urllib3
@@ -148,9 +149,18 @@ def extract_features_from_html(html_content, url, website_type):
         'num_special_chars': num_special_chars
     }
 
+import os
+
 def process_urls(urls_and_types, output_file):
     # Initialize an empty list to store features
     features_list = []
+
+    # Check if the output CSV file already exists
+    if os.path.exists(output_file):
+        # If it exists, read the existing data
+        existing_data = pd.read_csv(output_file)
+        # Append the new features to the existing data
+        features_list += existing_data.to_dict('records')
 
     for url, website_type in urls_and_types:
         # Extract features for each URL

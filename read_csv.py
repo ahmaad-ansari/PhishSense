@@ -24,7 +24,8 @@ Date: March 10, 2024
 
 import pandas as pd
 
-def read_csv(file_path):
+def read_csv(file_path, start_line=0, end_line=None):
     # Read CSV file into a Pandas DataFrame
-    df = pd.read_csv(file_path)
+    df = pd.read_csv(file_path, skiprows=range(1, start_line), nrows=end_line - start_line + 1)
     return df[['url', 'type']].values.tolist()
+

@@ -14,6 +14,8 @@ Usage:
 Arguments:
   --input (-i): Path to the input CSV file containing URLs and types.
   --output (-o): Path to the output CSV file where features will be saved.
+  --start-line: Start line for reading data from the input CSV.
+  --end-line: End line for reading data from the input CSV.
 
 The script performs the following steps:
   1. Parses command-line arguments using argparse.
@@ -34,6 +36,8 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='Extract features from URLs in a CSV file.')
     parser.add_argument('--input', '-i', required=True, help='Input CSV file with URLs and types')
     parser.add_argument('--output', '-o', required=True, help='Output CSV file for extracted features')
+    parser.add_argument('--start-line', type=int, default=0, help='Start line for reading data from the input CSV')
+    parser.add_argument('--end-line', type=int, default=None, help='End line for reading data from the input CSV')
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -42,7 +46,7 @@ if __name__ == "__main__":
         args = parse_arguments()
 
         # Step 1: Read CSV and get URLs with types
-        urls_and_types = read_csv(args.input)
+        urls_and_types = read_csv(args.input, start_line=args.start_line, end_line=args.end_line)
 
         # Step 2: Extract features and save to CSV
         process_urls(urls_and_types, args.output)

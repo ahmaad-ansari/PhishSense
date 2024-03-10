@@ -35,13 +35,14 @@ pip install -r requirements.txt
 
 3. **Run the Main Script:**
 
-   Execute the main script (`main.py`) with the input CSV file and desired output file for extracted features:
+   Execute the main script (`main.py`) with the input CSV file and desired output file for extracted features. Optionally, you can specify the start and end lines (inclusive) to read from the input CSV file:
 
    ```bash
-   python main.py --input your_csv_file.csv --output extracted_features.csv
+   python main.py --input your_csv_file.csv --output extracted_features.csv --start-line 1 --end-line 100
    ```
-
+   
    This will read the CSV, extract features from each URL, and save the results to a new CSV file (`extracted_features.csv`).
+
 
 ### 3. Output
 
