@@ -26,6 +26,7 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import re
+import logging
 
 def extract_features(url, website_type):
     try:
@@ -38,19 +39,21 @@ def extract_features(url, website_type):
         # Check for successful response status code
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        print(f"Error fetching {url}: {e}")
+        logging.error(f"Error fetching {url}: {e}")
         return None
 
-    html_content = response.text
+    return extract_features_from_html(response.text, url, website_type)
 
+def extract_features_from_html(html_content, url, website_type):
     # Use BeautifulSoup to parse HTML
     soup = BeautifulSoup(html_content, 'html.parser')
-
+    
     # Binary Features
     has_login_form = len(soup.select('form[action*="login"]')) > 0
     has_https = url.startswith('https://')
     has_iframe = len(soup.find_all('iframe')) > 0
-    has_phishing_words = any(word in html_content.lower() for word in ['phishing', 'login', 'password', 'account'])
+    phishing_words = ['login', 'password', 'account', 'verify', 'security', 'authenticate', 'update', 'confirm', 'identity', 'validation', 'billing', 'unusual', 'suspicious', 'urgent', 'information', 'recovery', 'suspend', 'fraud', 'alert', 'compromise']
+    has_phishing_words = any(word in html_content.lower() for word in phishing_words)
 
     # Quantitative Features
     num_links = len(soup.find_all('a'))
@@ -66,7 +69,8 @@ def extract_features(url, website_type):
 
     # Heuristic Features
     title = soup.title.text.strip() if soup.title else None
-    has_keywords = any(keyword in html_content.lower() for keyword in ['phishing', 'login', 'password', 'account'])
+    keywords = ['official', 'authorized', 'genuine', 'secure', 'trusted', 'verified', 'legitimate']
+    has_keywords = any(word in html_content.lower() for word in keywords)
     has_external_links = any(link['href'].startswith(('http://', 'https://')) for link in soup.find_all('a'))
     avg_link_text_length = sum(len(link.text) for link in soup.find_all('a')) / num_links if num_links > 0 else 0
     has_popular_script_libraries = any(lib in html_content.lower() for lib in ['jquery', 'angular', 'react', 'vue'])
@@ -108,4 +112,3 @@ def process_urls(urls_and_types, output_file):
 
     # Save the DataFrame to a CSV file
     df.to_csv(output_file, index=False)
-

@@ -25,12 +25,12 @@ pip install -r requirements.txt
 
 2. **Prepare the CSV File:**
 
-   Create a CSV file (`your_csv_file.csv`) with columns 'url' and 'type', where 'type' indicates whether the URL is legitimate or phishing.
+   Create a CSV file (`your_csv_file.csv`) with columns 'url' and 'type', where 'type' indicates whether the URL is legitimate (0) or phishing (1).
 
    ```csv
    url,type
-   http://example.com,legitimate
-   http://phishing.com,phishing
+   http://example.com,0
+   http://phishing.com,1
    ```
 
 3. **Run the Main Script:**
