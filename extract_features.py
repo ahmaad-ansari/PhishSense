@@ -22,27 +22,72 @@ Author: Ahmaad Ansari
 Date: March 10, 2024
 """
 
+import logging
 import requests
+import urllib3
 from bs4 import BeautifulSoup
 import pandas as pd
 import re
-import logging
+
+# Disable SSL warnings
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# Set up a logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# Configure the logger to print to the console
+console = logging.StreamHandler()
+formatter = logging.Formatter('%(levelname)s: %(message)s')
+
+# Set up colors for logging levels
+RED = "\033[1;31m"
+GREEN = "\033[1;32m"
+RESET = "\033[0m"
+
+# Create a class to colorize log messages
+class ColoredFormatter(logging.Formatter):
+    def format(self, record):
+        if record.levelno == logging.ERROR:
+            return RED + super().format(record) + RESET
+        elif record.levelno == logging.INFO:
+            return GREEN + super().format(record) + RESET
+        else:
+            return super().format(record)
+
+console.setFormatter(ColoredFormatter('%(levelname)s: %(message)s'))
+
+# Add the console handler to the logger
+logger.addHandler(console)
 
 def extract_features(url, website_type):
+    result = None  # Initialize result to None
+
     try:
+        # Ensure the URL has the correct protocol (https:// or http://)
+        if not url.startswith(('http://', 'https://')):
+            url = 'https://' + url
+
         # Set a user agent to mimic a web browser
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
 
         # Make a request to the URL with headers
-        response = requests.get(url, headers=headers, timeout=5)
+        response = requests.get(url, headers=headers, timeout=5, verify=False)
 
         # Check for successful response status code
         response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Error fetching {url}: {e}")
-        return None
 
-    return extract_features_from_html(response.text, url, website_type)
+        # Log successful request
+        logger.info(f"Successfully fetched {url}")
+
+    except requests.exceptions.RequestException as e:
+        # Log error if the request fails
+        logger.error(f"Error fetching {url}: {e}")
+    else:
+        # If there was no error, proceed with further processing
+        result = extract_features_from_html(response.text, url, website_type)
+
+    return result
 
 def extract_features_from_html(html_content, url, website_type):
     # Use BeautifulSoup to parse HTML
@@ -54,6 +99,11 @@ def extract_features_from_html(html_content, url, website_type):
     has_iframe = len(soup.find_all('iframe')) > 0
     phishing_words = ['login', 'password', 'account', 'verify', 'security', 'authenticate', 'update', 'confirm', 'identity', 'validation', 'billing', 'unusual', 'suspicious', 'urgent', 'information', 'recovery', 'suspend', 'fraud', 'alert', 'compromise']
     has_phishing_words = any(word in html_content.lower() for word in phishing_words)
+    has_title = bool(soup.title)
+    keywords = ['official', 'authorized', 'genuine', 'secure', 'trusted', 'verified', 'legitimate']
+    has_keywords = any(word in html_content.lower() for word in keywords)
+    has_external_links = any('href' in link.attrs and link['href'].startswith(('http://', 'https://')) for link in soup.find_all('a'))
+    has_popular_script_libraries = any(lib in html_content.lower() for lib in ['jquery', 'angular', 'react', 'vue'])
 
     # Quantitative Features
     num_links = len(soup.find_all('a'))
@@ -68,12 +118,7 @@ def extract_features_from_html(html_content, url, website_type):
     avg_word_length = sum(len(word) for word in re.findall(r'\b\w+\b', html_content)) / len(re.findall(r'\b\w+\b', html_content)) if len(re.findall(r'\b\w+\b', html_content)) > 0 else 0
 
     # Heuristic Features
-    title = soup.title.text.strip() if soup.title else None
-    keywords = ['official', 'authorized', 'genuine', 'secure', 'trusted', 'verified', 'legitimate']
-    has_keywords = any(word in html_content.lower() for word in keywords)
-    has_external_links = any(link['href'].startswith(('http://', 'https://')) for link in soup.find_all('a'))
     avg_link_text_length = sum(len(link.text) for link in soup.find_all('a')) / num_links if num_links > 0 else 0
-    has_popular_script_libraries = any(lib in html_content.lower() for lib in ['jquery', 'angular', 'react', 'vue'])
 
     # URL Structure Features
     num_subdomains = len(url.split('.')) - 2  # subtract 2 to exclude 'http://' or 'https://'
@@ -94,7 +139,7 @@ def extract_features_from_html(html_content, url, website_type):
         'num_input_tags': num_input_tags,
         'content_length': content_length,
         'avg_word_length': avg_word_length,
-        'title': title,
+        'has_title': has_title,
         'has_keywords': has_keywords,
         'has_external_links': has_external_links,
         'avg_link_text_length': avg_link_text_length,
@@ -104,8 +149,16 @@ def extract_features_from_html(html_content, url, website_type):
     }
 
 def process_urls(urls_and_types, output_file):
-    # Extract features for each URL
-    features_list = [extract_features(url, website_type) for url, website_type in urls_and_types if extract_features(url, website_type) is not None]
+    # Initialize an empty list to store features
+    features_list = []
+
+    for url, website_type in urls_and_types:
+        # Extract features for each URL
+        features = extract_features(url, website_type)
+
+        # Check if features were successfully extracted
+        if features is not None:
+            features_list.append(features)
 
     # Convert the list of dictionaries to a Pandas DataFrame
     df = pd.DataFrame(features_list)

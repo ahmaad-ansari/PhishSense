@@ -37,11 +37,17 @@ def parse_arguments():
     return parser.parse_args()
 
 if __name__ == "__main__":
-    # Parse command-line arguments
-    args = parse_arguments()
+    try:
+        # Parse command-line arguments
+        args = parse_arguments()
 
-    # Step 1: Read CSV and get URLs with types
-    urls_and_types = read_csv(args.input)
+        # Step 1: Read CSV and get URLs with types
+        urls_and_types = read_csv(args.input)
 
-    # Step 2: Extract features and save to CSV
-    process_urls(urls_and_types, args.output)
+        # Step 2: Extract features and save to CSV
+        process_urls(urls_and_types, args.output)
+
+    except KeyboardInterrupt:
+        print("Ctrl+C pressed. Exiting gracefully.")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
