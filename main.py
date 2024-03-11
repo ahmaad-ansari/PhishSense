@@ -36,8 +36,8 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='Extract features from URLs in a CSV file.')
     parser.add_argument('--input', '-i', required=True, help='Input CSV file with URLs and types')
     parser.add_argument('--output', '-o', required=True, help='Output CSV file for extracted features')
-    parser.add_argument('--start-line', type=int, default=0, help='Start line for reading data from the input CSV')
-    parser.add_argument('--end-line', type=int, default=None, help='End line for reading data from the input CSV')
+    parser.add_argument('--start-line', '-s', type=int, default=0, help='Start line for reading data from the input CSV')
+    parser.add_argument('--end-line', '-e', type=int, default=None, help='End line for reading data from the input CSV')
     return parser.parse_args()
 
 if __name__ == "__main__":
