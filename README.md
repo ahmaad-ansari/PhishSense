@@ -1,5 +1,14 @@
 # PhishSense
 
+## Table of Contents
+- [Overview](#overview)
+- [Usage](#usage)
+  - [1. Installation](#1-installation)
+  - [2. Running the System](#2-running-the-system)
+  - [3. Output](#3-output)
+- [Notes](#notes)
+- [Machine Learning Description](#machine-learning-description)
+
 ## Overview
 
 PhishSense is a system designed to extract features from URLs, classify them as either legitimate or phishing, and create a structured dataset for machine learning model training. The system consists of Python scripts that read a CSV file containing URLs and their corresponding types, then extracts features from each URL using web scraping techniques. The extracted features are saved to a CSV file, which can be used to train machine learning models for phishing detection.
@@ -40,9 +49,8 @@ pip install -r requirements.txt
    ```bash
    python main.py --input your_csv_file.csv --output extracted_features.csv --start-line 1 --end-line 100
    ```
-   
-   This will read the CSV, extract features from each URL, and save the results to a new CSV file (`extracted_features.csv`).
 
+   This will read the CSV, extract features from each URL, and save the results to a new CSV file (`extracted_features.csv`).
 
 ### 3. Output
 
@@ -52,3 +60,14 @@ The system generates a CSV file (`extracted_features.csv`) containing the extrac
 
 - Ensure that the URLs in the input CSV file are accessible, as the system makes web requests to extract features.
 - The machine learning model training part is not included in this system. You can use the generated `extracted_features.csv` file to train your own machine learning model for phishing detection.
+
+## Machine Learning Description
+
+The IPYNB file (`Machine Learning Models.ipynb`) contains code for training and evaluating machine learning models for phishing detection. The file includes the following sections:
+
+1. **Setup**: Installation of necessary libraries and modules.
+2. **Data Loading and Preprocessing**: Loading the dataset and preprocessing steps such as standard scaling.
+3. **Data Visualization**: Visualizing the dataset using Principal Component Analysis (PCA).
+4. **Support Vector Machine (SVM)**: Training, evaluation, and visualization of results for SVM model.
+5. **Neural Networks**: Building, training, evaluation, and visualization of results for neural network model.
+6. **Random Forest**: Training, evaluation, and visualization of results for random forest model.
