@@ -1,5 +1,4 @@
-url,type,has_login_form,has_https,has_iframe,has_phishing_words,num_links,num_images,num_scripts,num_styles,num_forms,num_input_tags,content_length,avg_word_length,has_title,has_keywords,has_external_links,avg_link_text_length,has_popular_script_libraries,num_subdomains,num_special_chars
-https://google.com,0,False,True,False,True,17,10,9,0,1,8,201233,4.243066836853099,True,True,True,9.352941176470589,False,0,4
+74https://google.com,0,False,True,False,True,17,10,9,0,1,8,201233,4.243066836853099,True,True,True,9.352941176470589,False,0,4
 https://facebook.com,0,True,True,False,True,47,1,16,4,1,17,57637,5.772765837104072,True,True,True,9.4468085106383,True,0,4
 https://microsoft.com,0,False,True,False,True,1,0,0,0,0,0,1020,5.373239436619718,True,False,True,40.0,False,0,4
 https://apple.com,0,False,True,False,True,116,0,16,6,1,5,169062,3.767995736317911,True,False,True,10.508620689655173,False,0,4
