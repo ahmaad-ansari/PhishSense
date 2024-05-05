@@ -56,6 +56,13 @@ pip install -r requirements.txt
 
 The system generates a CSV file (`extracted_features.csv`) containing the extracted features for each URL, including the URL itself, title, number of links, and the type of the website (legitimate or phishing). This file can be used as a labeled dataset for training machine learning models.
 
+## Demo
+
+Watch this video to see PhishSense's interface and trained machine learning models in action.
+
+https://github.com/ahmaad-ansari/PhishSense/assets/88805493/652d2ca0-24d2-4aa6-9ff7-651b7c3b65db
+
+
 ## Notes
 
 - Ensure that the URLs in the input CSV file are accessible, as the system makes web requests to extract features.
